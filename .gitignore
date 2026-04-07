@@ -166,3 +166,20 @@ nohup.out
 *.zip
 
 venv_win/
+
+# Local OS files
+.DS_Store
+
+# Generated analysis artifacts
+correlation_matrix*.pt
+entropy_comparison_*.pt
+entropy_plots_*/
+entropy_vs_batch_size_*.pt
+entropy_vs_batch_size_resid_out_layer*/
+feature_location_data.pt
+feature_sparsity_data*.pt
+feature_sparsity_resid_out_layer*.csv
+feature_token_influence*.pt
+token_vector_influence*.pt
+*_histogram*.png
+*position*.png

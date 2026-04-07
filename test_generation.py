@@ -10,7 +10,7 @@ def main():
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     
-    prompt = "Quantum mechanics is the foundation of modern physics."
+    prompt = "Entropy measures the amount of information in a message, "
     print(f"[INFO] Prompt: {repr(prompt)}")
     
     inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)

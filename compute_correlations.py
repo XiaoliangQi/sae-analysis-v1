@@ -7,17 +7,32 @@ import sys
 # Configuration
 MODEL_NAME = "EleutherAI/pythia-70m-deduped"
 DATA_FILE = Path("wikitext-2-train.txt")
-PT_FILE = Path("feature_sparsity_data.pt")
-OUTPUT_FILE = Path("correlation_matrix.pt")
 MIN_UNIQUE_TOKENS = 300
 
-def main():
-    if not PT_FILE.exists():
-        print(f"Error: {PT_FILE} not found.")
+def main(site=None):
+    """
+    Main function to compute correlation matrix for a given layer.
+    
+    Args:
+        site: Site string like "resid_out_layer3" (if None, uses default)
+    """
+    # Use provided site or default
+    if site is None:
+        site = "resid_out_layer0"
+    
+    pt_file = Path(f"feature_sparsity_data_{site}.pt")
+    output_file = Path(f"correlation_matrix_{site}.pt")
+    
+    if not pt_file.exists():
+        print(f"Error: {pt_file} not found.")
         return
 
-    print(f"Loading {PT_FILE}...")
-    data = torch.load(PT_FILE, map_location="cpu")
+    print(f"\n{'='*60}")
+    print(f"[INFO] Processing {site}")
+    print(f"{'='*60}")
+    
+    print(f"Loading {pt_file}...")
+    data = torch.load(pt_file, map_location="cpu")
     
     feature_counts = data["feature_counts"]
     # frequencies = data["frequencies"] # Not strictly needed if we compute from counts
@@ -237,11 +252,37 @@ def main():
         
         print(f"{f1:<10} | {f2:<10} | {real_val:.2e}")
 
-    print(f"Saving covariance matrix to {OUTPUT_FILE}...")
+    print(f"Saving covariance matrix to {output_file}...")
     torch.save({
         "covariance_matrix": Cov,
-        "leading_features": leading_features
-    }, OUTPUT_FILE)
+        "leading_features": leading_features,
+        "site": site
+    }, output_file)
+    print(f"✓ Successfully completed {site}\n")
 
 if __name__ == "__main__":
-    main()
+    # Option 1: Run for a single layer (backward compatible)
+    # main(site="resid_out_layer0")
+    
+    # Option 2: Run for multiple layers
+    sites = [
+        "resid_out_layer0",
+        "resid_out_layer1",
+        "resid_out_layer2",
+        "resid_out_layer3",
+        "resid_out_layer4",
+        "resid_out_layer5",
+    ]
+    
+    for site in sites:
+        try:
+            main(site=site)
+        except Exception as e:
+            print(f"[ERROR] Failed to process {site}: {e}")
+            import traceback
+            traceback.print_exc()
+            continue
+    
+    print("\n" + "="*60)
+    print("All layers processed!")
+    print("="*60)

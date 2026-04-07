@@ -10,7 +10,8 @@ def main():
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     
-    prompt = "I want to understand transformer models by sparse-auto-encoder"
+    prompt = """
+    To be or not to be, """
     print(f"[INFO] Processing prompt: {repr(prompt)}")
     
     inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)

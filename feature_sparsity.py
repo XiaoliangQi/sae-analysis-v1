@@ -9,8 +9,6 @@ import csv
 
 # Configuration
 MODEL_NAME = "EleutherAI/pythia-70m-deduped"
-SITE = "resid_out_layer3"
-BASE_DIR = Path("dictionaries/pythia-70m-deduped") / SITE
 DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
 THRESHOLD = 1.0
 SAMPLE_TEXT_LEN = 2000 # Number of tokens to process
@@ -60,14 +58,31 @@ def get_feature_activations(resid, sae_weights):
 
 # --- Main Analysis ---
 
-def main():
+def main(site=None):
+    """
+    Main function to compute feature sparsity.
+    
+    Args:
+        site: Site string like "resid_out_layer3" (if None, uses default)
+    """
+    # Use provided site or default
+    if site is None:
+        site = "resid_out_layer3"
+    
+    base_dir = Path("dictionaries/pythia-70m-deduped") / site
+    
     # 1. Setup
     run_dir = None
-    for p in BASE_DIR.iterdir():
+    for p in base_dir.iterdir():
         if p.is_dir() and (p / "ae.pt").exists():
             run_dir = p
             break
-    if not run_dir: raise FileNotFoundError("No run directory found")
+    if not run_dir: 
+        raise FileNotFoundError(f"No run directory found in {base_dir}")
+
+    print(f"\n{'='*60}")
+    print(f"[INFO] Processing {site}")
+    print(f"{'='*60}")
 
     print("[INFO] Loading Model...")
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
@@ -109,7 +124,7 @@ def main():
     feature_counts = torch.zeros(n_latent, device=DEVICE)
     feature_token_counts = [Counter() for _ in range(n_latent)] # List of Counters
     
-    layer_idx = int(SITE.rsplit("layer", 1)[-1])
+    layer_idx = int(site.rsplit("layer", 1)[-1])
     layer = model.gpt_neox.layers[layer_idx]
     
     print(f"[INFO] Computing feature activations (Threshold > {THRESHOLD})...")
@@ -176,7 +191,7 @@ def main():
     frequencies = feature_counts / total_tokens
     
     print("-" * 60)
-    print(f"Analysis Results (Sample size: {total_tokens} tokens)")
+    print(f"Analysis Results for {site} (Sample size: {total_tokens} tokens)")
     print("-" * 60)
     print(f"Total Features: {n_latent}")
     print(f"Dead Features (0 activations): {dead_features} ({dead_features/n_latent:.2%})")
@@ -208,13 +223,14 @@ def main():
     
     plt.figure(figsize=(10, 6))
     plt.hist(active_freqs, bins=200, log=True, color='skyblue', edgecolor='black')
-    plt.title(f"Feature Activation Frequency Distribution (Threshold > {THRESHOLD})")
+    plt.title(f"Feature Activation Frequency Distribution - {site} (Threshold > {THRESHOLD})")
     plt.xlabel("Frequency (Activation Probability)")
     plt.ylabel("Count of Features (Log Scale)")
     plt.grid(True, which="both", ls="-", alpha=0.2)
     
-    out_file = "sparsity_histogram.png"
+    out_file = f"sparsity_histogram_{site}.png"
     plt.savefig(out_file)
+    plt.close()  # Close figure to free memory
     print(f"[INFO] Histogram saved to {out_file}")
 
     # Save Data
@@ -226,14 +242,17 @@ def main():
         "frequencies": frequencies.cpu(),
         "total_tokens": total_tokens,
         "threshold": THRESHOLD,
+        "site": site,  # Include site in data
         "feature_token_counts": feature_token_counts # List of Counters
     }
-    torch.save(data, "feature_sparsity_data.pt")
-    print("[INFO] Saved 'feature_sparsity_data.pt'")
+    pt_file = f"feature_sparsity_data_{site}.pt"
+    torch.save(data, pt_file)
+    print(f"[INFO] Saved '{pt_file}'")
     
     # 2. Save as CSV (readable)
     # Columns: feature_idx, count, frequency, top_tokens
-    with open("feature_sparsity.csv", "w", newline="") as f:
+    csv_file = f"feature_sparsity_{site}.csv"
+    with open(csv_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["feature_idx", "count", "frequency", "top_tokens"])
         for idx, (cnt, freq) in enumerate(zip(feature_counts.tolist(), frequencies.tolist())):
@@ -244,7 +263,33 @@ def main():
             top_t_str = ", ".join([f"{repr(tokenizer.decode([t]))}({c})" for t, c in top_t])
             
             writer.writerow([idx, int(cnt), f"{freq:.6f}", top_t_str])
-    print("[INFO] Saved 'feature_sparsity.csv'")
+    print(f"[INFO] Saved '{csv_file}'")
+    
+    print(f"\n✓ Successfully completed {site}\n")
     
 if __name__ == "__main__":
-    main()
+    # Option 1: Run for a single layer (backward compatible)
+    # main(site="resid_out_layer3")
+    
+    # Option 2: Run for multiple layers
+    sites = [
+        "resid_out_layer0",
+        "resid_out_layer1", 
+        "resid_out_layer2",
+        "resid_out_layer3",
+        "resid_out_layer4",
+        "resid_out_layer5",
+    ]
+    
+    for site in sites:
+        try:
+            main(site=site)
+        except Exception as e:
+            print(f"[ERROR] Failed to process {site}: {e}")
+            import traceback
+            traceback.print_exc()
+            continue
+    
+    print("\n" + "="*60)
+    print("All layers processed!")
+    print("="*60)
