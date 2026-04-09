@@ -170,6 +170,10 @@ venv_win/
 # Local OS files
 .DS_Store
 
+# Dataset text files (download with scripts/utils/download_data.py)
+wikitext-2-train.txt
+wikitext-2-test.txt
+
 # Generated analysis artifacts
 correlation_matrix*.pt
 entropy_comparison_*.pt
@@ -177,12 +181,15 @@ entropy_plots_*/
 entropy_vs_batch_size_*.pt
 entropy_vs_batch_size_resid_out_layer*/
 feature_location_data.pt
+feature_location.csv
 feature_sparsity_data*.pt
-feature_sparsity_resid_out_layer*.csv
+feature_sparsity*.csv
 feature_token_influence*.pt
 token_vector_influence*.pt
 *_histogram*.png
 *position*.png
+logits_comparison*.png
+sae_heatmap.png
 !paper/figures/*.png
 
 # LaTeX auxiliary files
