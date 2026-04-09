@@ -47,6 +47,8 @@ note.md                — detailed research notes: motivation, math derivations
                           definitions of all quantities, and references
 
 scripts/
+├── figures/           — ONE SCRIPT PER PAPER FIGURE (fig01_*.py … fig08_*.py)
+│                        Each saves directly to paper/figures/. See scripts/figures/README.md.
 ├── analysis/          — core data-producing scripts (run these first)
 │   ├── feature_sparsity.py           — stage 1: per-feature activation statistics
 │   ├── compute_correlations.py       — stage 2a: feature correlation matrix
@@ -172,20 +174,34 @@ python scripts/analysis/entropy_vs_batch_size.py --site resid_out_layer2
 # Outputs: entropy_vs_batch_size_resid_out_layer2_<timestamp>.pt  + plots
 ```
 
-**Figure generation from saved data:**
+**Figure generation from saved data** (see `scripts/figures/README.md` for the full table):
 
-| Figure (paper) | Script | Input data | Notes |
-|---|---|---|---|
-| Fig 1 — unique tokens histogram | `scripts/analysis/feature_sparsity.py` | WikiText-2, SAE | Saved as `sparsity_histogram_<site>.png` |
-| Fig 2 — correlation heatmap | `notebooks/feature_analysis_cleaned.ipynb` | `correlation_matrix_<site>.pt` | Notebook cell |
-| Fig 3 — influence heatmap | `scripts/plotting/analyze_feature_token_influence_final.py` | `feature_token_influence_<site>.pt` | Shows Feature 531, layer 3 |
-| Fig 4 — entropy distribution per feature | `scripts/plotting/plot_all_features_entropy_histogram.py` | `feature_token_influence_<site>.pt` | Edit `SITE` variable |
-| Fig 5 — entropy vs depth | `scripts/plotting/plot_entropy_vs_depth.py` | `entropy_comparison_resid_out_layer*.pt` (all layers) | Run from repo root |
-| Fig 6 — entropy histograms by layer | `notebooks/feature_analysis_cleaned.ipynb` | `entropy_comparison_<site>_*.pt` | Notebook cell |
-| Fig 7 — entropy vs context length | `scripts/plotting/plot_entropy_vs_batch_size_notebook.py` | `entropy_vs_batch_size_<site>_*.pt` | Edit site variable |
-| Fig 8 — entropy vs activation probability | `scripts/plotting/plot_entropy_vs_activation.py` | `feature_token_influence_<site>.pt` + `feature_sparsity_data_<site>.pt` | Layer 5 in paper |
+Each paper figure has a dedicated script in `scripts/figures/` that loads the required
+`.pt` data and saves directly to `paper/figures/`:
 
-After generating, compare with `paper/figures/` to verify.
+```bash
+python scripts/figures/fig01_unique_tokens_histogram.py   # Fig 1
+python scripts/figures/fig02_correlation_heatmap.py       # Fig 2
+python scripts/figures/fig03_influence_heatmap.py         # Fig 3
+python scripts/figures/fig04_entropy_distribution_batches.py  # Fig 4
+python scripts/figures/fig05_entropy_vs_depth.py          # Fig 5
+python scripts/figures/fig06_entropy_multilayer_histograms.py # Fig 6
+python scripts/figures/fig07_entropy_vs_batchsize.py      # Fig 7
+python scripts/figures/fig08_entropy_vs_activation.py     # Fig 8
+```
+
+| Script | Paper figure | Required `.pt` data |
+|--------|-------------|---------------------|
+| `fig01_unique_tokens_histogram.py` | Fig. 1 | `feature_sparsity_data_resid_out_layer0.pt` |
+| `fig02_correlation_heatmap.py` | Fig. 2 | `correlation_matrix_resid_out_layer3.pt` |
+| `fig03_influence_heatmap.py` | Fig. 3 | `feature_token_influence_resid_out_layer3.pt` |
+| `fig04_entropy_distribution_batches.py` | Fig. 4 | `feature_token_influence_resid_out_layer3.pt` |
+| `fig05_entropy_vs_depth.py` | Fig. 5 | `entropy_comparison_resid_out_layer{0..5}_*.pt` |
+| `fig06_entropy_multilayer_histograms.py` | Fig. 6 | `entropy_comparison_resid_out_layer{0..4}_*.pt` |
+| `fig07_entropy_vs_batchsize.py` | Fig. 7 | `entropy_vs_batch_size_resid_out_layer2_*.pt` |
+| `fig08_entropy_vs_activation.py` | Fig. 8 | `feature_token_influence_resid_out_layer5.pt` + `feature_sparsity_data_resid_out_layer5.pt` |
+
+After generating, compare output with `paper/figures/` to verify.
 
 ### Run experiments
 
