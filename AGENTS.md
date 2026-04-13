@@ -92,6 +92,13 @@ dictionary_learning/  — SAE library by Marks, Karvonen & Mueller
                         (https://github.com/saprmarks/dictionary_learning)
 
 tests/                — unit and end-to-end tests for the dictionary_learning library
+
+supplementary/
+├── know-how.md       — methodology decisions and tacit knowledge (why squared L2,
+│                       why last-token evaluation, limits of the holography analogy,
+│                       dead ends, compute notes)
+├── authors-note.md   — author's message to readers beyond the paper
+└── checklist.md      — publication quality checklist
 ```
 
 **External data and models** (not tracked in git):
@@ -245,6 +252,13 @@ Interesting directions to explore:
 5. **Geometry from correlations**: The correlation matrix in `correlation_matrix_<site>.pt` encodes pairwise feature co-activation. One could apply manifold learning (UMAP, MDS) to embed features in 2D by their correlation structure and compare with their average entropy values.
 
 6. **Causal vs. non-causal comparison**: The current analysis uses causal attention. A bidirectional model (BERT-style) with SAEs would have qualitatively different nonlocality structure at each layer.
+
+## Supplementary Materials
+
+- **`supplementary/know-how.md`** — methodology decisions and tacit knowledge not fully explained in the paper: why squared L2 norm, why last token position, why active-batch averaging, the limits of the holographic analogy, dead ends explored. Read this alongside the paper.
+- **`supplementary/authors-note.md`** — the author's message to readers beyond the paper.
+- **`supplementary/checklist.md`** — publication quality checklist.
+- **`note.md`** (repo root) — original research notes with full mathematical derivations and the AdS/CFT analogy developed in detail. Essential for understanding *why* the paper asks the questions it asks.
 
 ## Research Context
 
