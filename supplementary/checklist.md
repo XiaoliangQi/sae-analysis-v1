@@ -34,7 +34,7 @@ This is a computational paper (analysis scripts + data pipeline + figures).
 
 ## Supplementary Materials
 - [x] `know-how.md` captures key methodology decisions and tacit knowledge
-- [ ] `authors-note.md` — needs author input (fill in before release)
+- [x] `authors-note.md` reflects what the author wants readers to know
 - [ ] Conversation history — not included (researcher preference)
 - [ ] Slides (`slides/sae_analysis.pdf`) — decide whether to include in `supplementary/materials/`
 - [x] All supplementary files pass confidentiality screening (no credentials or private paths)
@@ -58,4 +58,4 @@ This is a computational paper (analysis scripts + data pipeline + figures).
 - [x] README is complete and accurate (v1.0.1)
 - [x] `.gitignore` covers build artifacts and generated files
 - [x] No sensitive information in any committed file
-- [ ] Researcher has reviewed and approved supplementary materials
+- [x] Researcher has reviewed and approved supplementary materials
